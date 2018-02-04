@@ -1,6 +1,6 @@
 library(plotly)
 library(shiny)
-library(RColorBrewer)
+
 maleData <- read.csv("WTAGEM.csv",header = TRUE)
 femaleData <- read.csv("WTAGEF.csv",header = TRUE)
 
