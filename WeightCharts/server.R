@@ -54,7 +54,6 @@ server<- function(input, output) {
     femalePlot <- ggplotly(femalePlot)
     
   })
-  #Need to find out how to plot two curves on data set
   
   
   
