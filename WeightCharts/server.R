@@ -26,7 +26,7 @@ server<- function(input, output) {
     }
     
     maleDF$Percentile <- factor(maleDF$Percentile)
-    malePlot<-ggplot(maleDF,aes(x=Age,y=Weight))+geom_smooth(aes(colour=Percentile),linetype='dotdash')
+    malePlot<-ggplot(maleDF,aes(x=Age,y=Weight))+geom_smooth(aes(colour=Percentile),linetype='dotdash',se=FALSE)
     
     
     malePlot<- malePlot+labs(x="Age(Months)",y="Weight(kg)")+ scale_x_continuous(breaks=seq(0,36,2))+scale_y_continuous(breaks = seq(0,20,0.5))
@@ -48,7 +48,7 @@ server<- function(input, output) {
     }
     
     femaleDF$Percentile=factor(femaleDF$Percentile)
-    femalePlot<-ggplot(femaleDF,aes(x=Age,y=Weight))+geom_smooth(aes(colour=Percentile),linetype='dotdash')
+    femalePlot<-ggplot(femaleDF,aes(x=Age,y=Weight))+geom_smooth(aes(colour=Percentile),linetype='dotdash',se=FALSE)
     
     femalePlot<- femalePlot+labs(x="Age(Months)",y="Weight(kg)")+ scale_x_continuous(breaks=seq(0,36,2))+scale_y_continuous(breaks = seq(0,20,0.5))
     femalePlot <- ggplotly(femalePlot)
