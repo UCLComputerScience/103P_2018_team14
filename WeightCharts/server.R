@@ -17,19 +17,19 @@ server<- function(input, output) {
     L<-maleData$L
     M<-maleData$M
     S<-maleData$S
-    maleDF<-data.frame(Age=numeric(),Weight=numeric(),Percentile=integer())
+    maleDF<-data.frame(Age=numeric(),Weight=numeric(),Centile=integer())
     
     for(i in 1:10)
     {
       weight<-lmsFunction(L,M,S,zValues[i])
-      maleDF<-rbind(maleDF,data.frame(Age=Agemos,Weight=weight,Percentile=pValues[i]))
+      maleDF<-rbind(maleDF,data.frame(Age=Agemos,Weight=weight,Centile=pValues[i]))
     }
     
-    maleDF$Percentile <- factor(maleDF$Percentile)
-    malePlot<-ggplot(maleDF,aes(x=Age,y=Weight))+geom_smooth(aes(colour=Percentile),linetype='dotdash',se=FALSE)
+    maleDF$Centile <- factor(maleDF$Centile, levels = rev(levels(maleDF$Centile)))
+    malePlot<-ggplot(maleDF,aes(x=Age,y=Weight))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
     
     
-    malePlot<- malePlot+labs(x="Age(Months)",y="Weight(kg)")+ scale_x_continuous(breaks=seq(0,36,2))+scale_y_continuous(breaks = seq(0,20,0.5))
+    malePlot<- malePlot+labs(x="Age(Months)",y="Weight(kg)")+ scale_x_continuous(breaks=seq(0,36,2))+scale_y_continuous(breaks = seq(0,20,1))
     malePlot <- ggplotly(malePlot)
   })
   
@@ -39,18 +39,18 @@ server<- function(input, output) {
     M<-femaleData$M
     S<-femaleData$S
     
-    femaleDF<-data.frame(Age=numeric(),Weight=numeric(),Percentile=character())
+    femaleDF<-data.frame(Age=numeric(),Weight=numeric(),Centile=character())
     
     for(i in 1:10)
     {
       weight<-lmsFunction(L,M,S,zValues[i])
-      femaleDF<-rbind(femaleDF,data.frame(Age=Agemos,Weight=weight,Percentile=pValues[i]))
+      femaleDF<-rbind(femaleDF,data.frame(Age=Agemos,Weight=weight,Centile=pValues[i]))
     }
     
-    femaleDF$Percentile=factor(femaleDF$Percentile)
-    femalePlot<-ggplot(femaleDF,aes(x=Age,y=Weight))+geom_smooth(aes(colour=Percentile),linetype='dotdash',se=FALSE)
+    femaleDF$Centile=factor(femaleDF$Centile, levels = rev(levels(femaleDF$Centile)))
+    femalePlot<-ggplot(femaleDF,aes(x=Age,y=Weight))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
     
-    femalePlot<- femalePlot+labs(x="Age(Months)",y="Weight(kg)")+ scale_x_continuous(breaks=seq(0,36,2))+scale_y_continuous(breaks = seq(0,20,0.5))
+    femalePlot<- femalePlot+labs(x="Age(Months)",y="Weight(kg)")+ scale_x_continuous(breaks=seq(0,36,2))+scale_y_continuous(breaks = seq(0,20,1))
     femalePlot <- ggplotly(femalePlot)
     
   })
