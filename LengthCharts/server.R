@@ -2,13 +2,15 @@
 library(shiny) 
 library(plotly)
 
-# here i assign the tables for male and female heights along with their respective lms values to aptly named variables
-maleData <- read.csv("maleLenTable.csv", header = T)
-femaleData <- read.csv("femaleLenTable.csv", header = T)
+# here i assign the tables for male and female heights along with their respective lms values to apply named variables
+LMSData <- read.csv("LMSData.csv",header = TRUE)
+maleData <- subset(LMSData,sex==1)
+femaleData <- subset(LMSData,sex==2)
+
 
 # these next two variables I declare are the z values corresponding to certain percentiles
-zVals <- c(-1.881, -1.645, -1.282, -0.674, 0, 0.674, 1.036, 1.282, 1.645, 1.881)
-pVals <- c("P3","P5","P10","P25","P50","P75","P85","P90","P95","P97")
+zVals <- c(-2.652, -2.054, -1.341, -0.674, 0, 0.674, 1.341, 2.054, 2.652)
+pVals <- c("0.4th", "2nd", "9th", "25th", "50th", "75th", "91st", "98th", "99.6th")
 
 # this is a fucntion that calculates the measurement from the l, m, s and z values
 calcMeasurement <- function(l,m,s,z){
@@ -17,13 +19,13 @@ calcMeasurement <- function(l,m,s,z){
 
 server<- function(input, output) {
   output$plotMale <- renderPlotly({
-    Agemos <- maleData$ï..Agemos 
-    L<-maleData$L
-    M<-maleData$M
-    S<-maleData$S
+    Agemos <- maleData$Months
+    L<-maleData$L.ht
+    M<-maleData$M.ht
+    S<-maleData$S.ht
     maleDF<-data.frame(Age=numeric(),Height=numeric(),Centile=integer())
     
-    for(i in 1:10)
+    for(i in 1:9)
     {
       height<-calcMeasurement(L,M,S,zVals[i])
       maleDF<-rbind(maleDF,data.frame(Age=Agemos,Height=height,Centile=pVals[i]))
@@ -33,19 +35,19 @@ server<- function(input, output) {
     malePlot<-ggplot(maleDF,aes(x=Age,y=Height))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
     
     
-    malePlot<- malePlot+labs(x="Age(Months)",y="Height (cm)")+ scale_x_continuous(breaks=seq(0,36,2))+scale_y_continuous(breaks=seq(40,110,by=5), limits=c(40,110))
+    malePlot<- malePlot+labs(x="Age (Months)",y="Height (cm)")+ scale_x_continuous(breaks=seq(0,60,2))+scale_y_continuous(breaks=seq(40,130,by=5), limits=c(40,max(maleDF$Height)))
     malePlot <- ggplotly(malePlot)
   })
   
   output$plotFemale <- renderPlotly({
-    Agemos <- femaleData$ï..Agemos 
-    L<-femaleData$L
-    M<-femaleData$M
-    S<-femaleData$S
+    Agemos <- femaleData$Months 
+    L<-femaleData$L.ht
+    M<-femaleData$M.ht
+    S<-femaleData$S.ht
     
     femaleDF<-data.frame(Age=numeric(),Height=numeric(),Centile=character())
     
-    for(i in 1:10)
+    for(i in 1:9)
     {
       height<-calcMeasurement(L,M,S,zVals[i])
       femaleDF<-rbind(femaleDF,data.frame(Age=Agemos,Height=height,Centile=pVals[i]))
@@ -54,7 +56,7 @@ server<- function(input, output) {
     femaleDF$Centile=factor(femaleDF$Centile, levels = rev(levels(femaleDF$Centile)))
     femalePlot<-ggplot(femaleDF,aes(x=Age,y=Height))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
     
-    femalePlot<- femalePlot+labs(x="Age(Months)",y="Height(cm)")+ scale_x_continuous(breaks=seq(0,36,2))+scale_y_continuous(breaks=seq(40,110,by=5), limits=c(40,110)) 
+    femalePlot<- femalePlot+labs(x="Age (Months)",y="Height (cm)")+ scale_x_continuous(breaks=seq(0,60,2))+scale_y_continuous(breaks=seq(40,130,by=5), limits=c(40,max(femaleDF$Height))) 
     femalePlot <- ggplotly(femalePlot)
     
   })

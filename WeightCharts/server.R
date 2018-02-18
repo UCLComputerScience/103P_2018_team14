@@ -1,11 +1,13 @@
 library(plotly)
 library(shiny)
 
-maleData <- read.csv("WTAGEM.csv",header = TRUE)
-femaleData <- read.csv("WTAGEF.csv",header = TRUE)
+LMSData <- read.csv("LMSData.csv",header = TRUE)
+maleData <- subset(LMSData,sex==1)
+femaleData <- subset(LMSData,sex==2)
 
-zValues <- c( -1.881, -1.645, -1.282, -0.674, 0, 0.674, 1.036, 1.282, 1.645, 1.881 )
-pValues <- c("P3","P5","P10","P25","P50","P75","P85","P90","P95","P97")
+zValues <- c(-2.652, -2.054, -1.341, -0.674, 0, 0.674, 1.341, 2.054, 2.652)
+pValues <- c("0.4th", "2nd", "9th", "25th", "50th", "75th", "91st", "98th", "99.6th")
+
 
 lmsFunction <- function(l,m,s,z){
   m*((1+l*s*z)^(1/l))
@@ -13,13 +15,13 @@ lmsFunction <- function(l,m,s,z){
 
 server<- function(input, output) {
   output$plotMale <- renderPlotly({
-    Agemos <- maleData$ï..Agemos 
-    L<-maleData$L
-    M<-maleData$M
-    S<-maleData$S
+    Agemos <- maleData$Months 
+    L<-maleData$L.wt
+    M<-maleData$M.wt
+    S<-maleData$S.wt
     maleDF<-data.frame(Age=numeric(),Weight=numeric(),Centile=integer())
     
-    for(i in 1:10)
+    for(i in 1:9)
     {
       weight<-lmsFunction(L,M,S,zValues[i])
       maleDF<-rbind(maleDF,data.frame(Age=Agemos,Weight=weight,Centile=pValues[i]))
@@ -29,19 +31,19 @@ server<- function(input, output) {
     malePlot<-ggplot(maleDF,aes(x=Age,y=Weight))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
     
     
-    malePlot<- malePlot+labs(x="Age(Months)",y="Weight(kg)")+ scale_x_continuous(breaks=seq(0,36,2))+scale_y_continuous(breaks = seq(0,20,1))
+    malePlot<- malePlot+labs(x="Age (Months)",y="Weight (kg)")+ scale_x_continuous(breaks=seq(0,60,2), limits = c(0,60))+scale_y_continuous(breaks = seq(0,30,1), limits = c(0,max(maleDF$Weight)))
     malePlot <- ggplotly(malePlot)
   })
   
   output$plotFemale <- renderPlotly({
-    Agemos <- femaleData$ï..Agemos 
-    L<-femaleData$L
-    M<-femaleData$M
-    S<-femaleData$S
+    Agemos <- femaleData$Months 
+    L<-femaleData$L.wt
+    M<-femaleData$M.wt
+    S<-femaleData$S.wt
     
     femaleDF<-data.frame(Age=numeric(),Weight=numeric(),Centile=character())
     
-    for(i in 1:10)
+    for(i in 1:9)
     {
       weight<-lmsFunction(L,M,S,zValues[i])
       femaleDF<-rbind(femaleDF,data.frame(Age=Agemos,Weight=weight,Centile=pValues[i]))
@@ -50,7 +52,7 @@ server<- function(input, output) {
     femaleDF$Centile=factor(femaleDF$Centile, levels = rev(levels(femaleDF$Centile)))
     femalePlot<-ggplot(femaleDF,aes(x=Age,y=Weight))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
     
-    femalePlot<- femalePlot+labs(x="Age(Months)",y="Weight(kg)")+ scale_x_continuous(breaks=seq(0,36,2))+scale_y_continuous(breaks = seq(0,20,1))
+    femalePlot<- femalePlot+labs(x="Age (Months)",y="Weight (kg)")+ scale_x_continuous(breaks=seq(0,60,2))+scale_y_continuous(breaks = seq(0,30,1), limits = c(0,max(femaleDF$Weight)))
     femalePlot <- ggplotly(femalePlot)
     
   })
