@@ -21,11 +21,19 @@ lmsFunctionToZ <- function(l,m,s,data){
   (((data/m)*l)-1)/(l*s)
 }
 
-plotZ <- function(x, type) {
-  switch(type,
-         A = hist(x),
-         B = barplot(x),
-         C = pie(x))
+plotZ <- function(gender) {
+  Agemos <- maleData$Months
+  DF<-data.frame(Age=numeric(),Values=numeric(),Centile=character())
+  for (i in 1:9)
+  {
+    DF<-rbind(DF,data.frame(Age=Agemos,Values=zValues[i],Centile=pValues[i]))
+  }
+  DF$Centile <- factor(DF$Centile, levels = rev(levels(DF$Centile)))
+  plot<-ggplot(DF,aes(x=Age,y=Values))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
+  plot <- plot + ggtitle(gender) + labs(x="Age (Months)",y="Z-Score")+ scale_x_continuous(breaks=seq(0,60,5), limits = c(0,60))
+  plot <- ggplotly(plot)
+  
+
 }
 
 plotGraph <- function(type, gender){
@@ -84,7 +92,7 @@ plotGraph <- function(type, gender){
   }
   else
   {
-    plot<- plot+labs(x="Age (Months)",y="Height (cm)")+ scale_x_continuous(breaks=seq(0,60,2))+scale_y_continuous(breaks=seq(40,130,by=5), limits=c(40,max(DF$Values)))
+    plot<- plot+labs(x="Age (Months)",y="Height (cm)")+ scale_x_continuous(breaks=seq(0,60,5))+scale_y_continuous(breaks=seq(40,130,by=5), limits=c(40,max(DF$Values)))
   }
   
   plot <- plot + ggtitle(gender)
@@ -94,19 +102,48 @@ plotGraph <- function(type, gender){
 }
 server<- function(input, output) {
   output$plotMaleWeight <- renderPlotly({
-    plotGraph("wt","Boys")
+    if (input$plotType1 == 1)
+    {
+      plotGraph("wt","Boys")
+    }
+    else
+    {
+      plotZ("Boys")
+    }
+    
   })
   
   output$plotFemaleWeight <- renderPlotly({
-    plotGraph("wt","Girls")
+    if (input$plotType2 == 1)
+    {
+      plotGraph("wt","Girls")
+    }
+    else
+    {
+      plotZ("Girls")
+    }
   })
   
   output$plotMaleHeight <- renderPlotly({
-    plotGraph("ht","Boys")
+    if (input$plotType3 == 1)
+    {
+      plotGraph("ht","Boys")
+    }
+    else
+    {
+      plotZ("Boys")
+    }
   })
   
   output$plotFemaleHeight <- renderPlotly({
-    plotGraph("ht","Girls")
+    if (input$plotType4 == 1)
+    {
+      plotGraph("ht","Girls")
+    }
+    else
+    {
+      plotZ("Girls")
+    }
   })
   
   
