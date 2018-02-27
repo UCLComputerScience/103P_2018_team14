@@ -6,6 +6,9 @@ LMSData <- read.csv("LMSData.csv",header = TRUE)
 maleData <- subset(LMSData,sex==1)
 femaleData <- subset(LMSData,sex==2)
 childrenData <- read.csv("ChildrenData.csv",header = TRUE)
+childrenData <- subset(childrenData,Months<=60)
+maleChildrenData <- subset(childrenData,sex==1)
+femaleChildrenData <- subset(childrenData,sex==2)
 
 #Z score values with corresponding centile lines
 zValues <- c(-2.652, -2.054, -1.341, -0.674, 0, 0.674, 1.341, 2.054, 2.652)
