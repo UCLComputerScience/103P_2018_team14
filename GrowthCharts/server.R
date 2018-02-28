@@ -23,23 +23,140 @@ lmsFunctionToM <- function(l,m,s,z){
 lmsFunctionToZ <- function(l,m,s,data){
   (((data/m)*l)-1)/(l*s)
 }
+getL<-function(type,gender,age){
+  if (gender=="Boys")
+  {
+    if (type=="wt")
+    {
+      return(maleData$L.wt[maleData$Months==age])
+    }
+    else
+    {
+      return(maleData$L.ht[maleData$Months==age])
+    }
+  }
+  else
+  {
+    if (type=="wt")
+    {
+      return(femaleData$L.wt[femaleData$Months==age])
+    }
+    else
+    {
+      return(femaleData$L.ht[femaleData$Months==age])
+    }
+    
+  }
+}
 
-plotZ <- function(gender) {
+getM<-function(type,gender,age){
+  if (gender=="Boys")
+  {
+    if (type=="wt")
+    {
+      return(maleData$M.wt[maleData$Months==age])
+    }
+    else
+    {
+      return(maleData$M.ht[maleData$Months==age])
+    }
+  }
+  else
+  {
+    if (type=="wt")
+    {
+      return(femaleData$M.wt[femaleData$Months==age])
+    }
+    else
+    {
+      return(femaleData$M.ht[femaleData$Months==age])
+    }
+    
+  }
+}
+
+getS<-function(type,gender,age){
+  if (gender=="Boys")
+  {
+    if (type=="wt")
+    {
+      return(maleData$S.wt[maleData$Months==age])
+    }
+    else
+    {
+      return(maleData$S.ht[maleData$Months==age])
+    }
+  }
+  else
+  {
+    if (type=="wt")
+    {
+      return(femaleData$S.wt[femaleData$Months==age])
+    }
+    else
+    {
+      return(femaleData$S.ht[femaleData$Months==age])
+    }
+    
+  }
+}
+
+plotZ <- function(type,gender, childID) {
   Agemos <- maleData$Months
   DF<-data.frame(Age=numeric(),Values=numeric(),Centile=character())
   for (i in 1:9)
   {
     DF<-rbind(DF,data.frame(Age=Agemos,Values=zValues[i],Centile=pValues[i]))
   }
+  # if (type=="wt")
+  # {
+  #   if(gender=="Boys")
+  #   {
+  #     childDF <- subset(maleChildrenData,id==childID)
+  #   }
+  #   else
+  #   {
+  #     childDF <- data.frame(Age=femaleChildrenData$Months[femaleChildrenData$id==childID], Data=femaleChildrenData$weight[femaleChildrenData$id==childID],Values=numeric())
+  # 
+  #   }
+  # }
+  # else
+  # {
+  #   if(gender=="Boys")
+  #   {
+  #     childDF <- data.frame(Age=maleChildrenData$Months[maleChildrenData$id==childID], Data=maleChildrenData$height[maleChildrenData$id==childID],Values=numeric())
+  #   }
+  #   else
+  #   {
+  #     childDF <- data.frame(Age=femaleChildrenData$Months[femaleChildrenData$id==childID], Data=femaleChildrenData$height[femaleChildrenData$id==childID],Values=numeric())
+  #   }
+  # }
+  # 
+  # for (i in 1:nrow(childDF))
+  # {
+  #   row<- childDF[i,]
+  #   L<-getL(type,gender,row$Months)
+  #   M<-getM(type,gender,row$Months)
+  #   S<-getS(type,gender,row$Months)
+  # 
+  #   data<-row$Data
+  #   value<-lmsFunctionToZ(L,M,S,data)
+  #   values<-union(values,c(value))
+  #   
+  # 
+  # }
+  # childDF <-cbind(childDF,data.frame(Values=values))
+  
   DF$Centile <- factor(DF$Centile, levels = rev(levels(DF$Centile)))
   plot<-ggplot(DF,aes(x=Age,y=Values))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
   plot <- plot + ggtitle(gender) + labs(x="Age (Months)",y="Z-Score")+ scale_x_continuous(breaks=seq(0,60,5), limits = c(0,60))
+  #plot<- plot + +geom_point(data=childDF,aes(x=Age, y=Values), show.legend = TRUE)
   plot <- ggplotly(plot)
   
 
 }
 
-plotGraph <- function(type, gender){
+plotGraph <- function(type, gender, childID){
   if (type=="wt")
   {
     if(gender=="Boys")
@@ -49,6 +166,7 @@ plotGraph <- function(type, gender){
       M<-maleData$M.wt
       S<-maleData$S.wt
       DF<-data.frame(Age=numeric(),Values=numeric(),Centile=integer())
+      childDF <- data.frame(Age=maleChildrenData$Months[maleChildrenData$id==childID], Values=maleChildrenData$weight[maleChildrenData$id==childID])
     }
     else
     {
@@ -57,6 +175,7 @@ plotGraph <- function(type, gender){
       M<-femaleData$M.wt
       S<-femaleData$S.wt
       DF<-data.frame(Age=numeric(),Values=numeric(),Centile=character())
+      childDF <- data.frame(Age=femaleChildrenData$Months[femaleChildrenData$id==childID], Values=femaleChildrenData$weight[femaleChildrenData$id==childID])
       
     }
   }
@@ -69,6 +188,7 @@ plotGraph <- function(type, gender){
       M<-maleData$M.ht
       S<-maleData$S.ht
       DF<-data.frame(Age=numeric(),Values=numeric(),Centile=integer())
+      childDF <- data.frame(Age=maleChildrenData$Months[maleChildrenData$id==childID], Values=maleChildrenData$height[maleChildrenData$id==childID])
     }
     else
     {
@@ -77,6 +197,7 @@ plotGraph <- function(type, gender){
       M<-femaleData$M.ht
       S<-femaleData$S.ht
       DF<-data.frame(Age=numeric(),Values=numeric(),Centile=character())
+      childDF <- data.frame(Age=femaleChildrenData$Months[femaleChildrenData$id==childID], Values=femaleChildrenData$height[femaleChildrenData$id==childID])
       
     }
   }
@@ -98,7 +219,7 @@ plotGraph <- function(type, gender){
     plot<- plot+labs(x="Age (Months)",y="Height (cm)")+ scale_x_continuous(breaks=seq(0,60,5))+scale_y_continuous(breaks=seq(40,130,by=5), limits=c(40,max(DF$Values)))
   }
   
-  plot <- plot + ggtitle(gender)
+  plot <- plot +geom_line(data=childDF, show.legend = TRUE) +geom_point(data=childDF) + ggtitle(gender)
   plot <- ggplotly(plot)
   
   
@@ -107,11 +228,11 @@ server<- function(input, output) {
   output$plotMaleWeight <- renderPlotly({
     if (input$plotType1 == 1)
     {
-      plotGraph("wt","Boys")
+      plotGraph("wt","Boys",input$boysWT)
     }
     else
     {
-      plotZ("Boys")
+      plotZ("wt","Boys",input$boysWT)
     }
     
   })
@@ -119,33 +240,33 @@ server<- function(input, output) {
   output$plotFemaleWeight <- renderPlotly({
     if (input$plotType2 == 1)
     {
-      plotGraph("wt","Girls")
+      plotGraph("wt","Girls",input$girlsWT)
     }
     else
     {
-      plotZ("Girls")
+      plotZ("wt","Girls",input$boysWT)
     }
   })
   
   output$plotMaleHeight <- renderPlotly({
     if (input$plotType3 == 1)
     {
-      plotGraph("ht","Boys")
+      plotGraph("ht","Boys",input$boysHT)
     }
     else
     {
-      plotZ("Boys")
+      plotZ("ht","Boys",input$boysHT)
     }
   })
   
   output$plotFemaleHeight <- renderPlotly({
     if (input$plotType4 == 1)
     {
-      plotGraph("ht","Girls")
+      plotGraph("ht","Girls",input$girlsHT)
     }
     else
     {
-      plotZ("Girls")
+      plotZ("ht","Girls",input$boysHT)
     }
   })
   
