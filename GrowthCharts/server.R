@@ -1,5 +1,6 @@
 library(plotly)
 library(shiny)
+library(BH)
 
 #Reading in the data files for creating the graphs
 LMSData <- read.csv("LMSData.csv",header = TRUE)
@@ -13,6 +14,18 @@ femaleChildrenData <- subset(childrenData,sex==2)
 #Z score values with corresponding centile lines
 zValues <- c(-2.652, -2.054, -1.341, -0.674, 0, 0.674, 1.341, 2.054, 2.652)
 pValues <- c("0.4th", "2nd", "9th", "25th", "50th", "75th", "91st", "98th", "99.6th")
+
+#Converts any z score value to a centile
+z2cent <- function(z) {
+  np <- abs(z) > qnorm(0.99)
+  ct <- round(pnorm(z) * 100, np)
+  mod10 <- ifelse(np, 0, floor(ct %% 10))
+  th <- ifelse(mod10 == 0 | mod10 > 4 | (ct > 10 & ct < 14), 4, mod10)
+  th <- paste0(ct, c('st', 'nd', 'rd', 'th')[th])
+  th[th == '0th'] <- paste0('SDS', round(z[th == '0th'], 1))
+  th[th == '100th'] <- paste('SDS', round(z[th == '100th'], 1), sep='+')
+  th
+}
 
 #LMS to measurement function
 lmsFunctionToM <- function(l,m,s,z){
@@ -130,6 +143,7 @@ plotZ <- function(type,gender, childID) {
       childDF <- subset(femaleChildrenData,id==childID & height >0, select = c(Months,height))
     }
   }
+  Centile <- data.frame(Centile = character())
   
   Values<- data.frame(Values=numeric())
 
@@ -143,15 +157,18 @@ plotZ <- function(type,gender, childID) {
     data<-childDF[i,2]
     value<-lmsFunctionToZ(L,M,S,data)
     Values<-rbind(Values,value)
+    Centile <- rbind(Centile, z2cent(value))
 
 
   }
-  childDF <-cbind(childDF,Values)
+  childDF <-cbind(childDF,Values,Centile)
   names(childDF)[names(childDF)=="Months"] <- "Age" #Renaming columns
   names(childDF)[3] <- "Values" #Renaming columns
   
+  childDF$my_text=paste("Centile: " ,Centile, sep="")
+  DF$my_text=paste("Centile: " ,Centile, sep="")
   DF$Centile <- factor(DF$Centile, levels = rev(levels(DF$Centile)))
-  plot<-ggplot(DF,aes(x=Age,y=Values))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
+  plot<-ggplot(DF,aes(x=Age,y=Values)) +geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
   plot <- plot + ggtitle(gender) + labs(x="Age (Months)",y="Z-Score")+ scale_x_continuous(breaks=seq(0,60,5), limits = c(0,60))
   plot<- plot +geom_point(data=childDF, show.legend = TRUE) + geom_line(data=childDF)
   plot <- ggplotly(plot)
@@ -222,8 +239,9 @@ plotGraph <- function(type, gender, childID){
     plot<- plot+labs(x="Age (Months)",y="Height (cm)")+ scale_x_continuous(breaks=seq(0,60,5))+scale_y_continuous(breaks=seq(40,130,by=5), limits=c(40,max(DF$Values)))
   }
   
-  plot <- plot +geom_line(data=childDF, show.legend = TRUE) +geom_point(data=childDF) + ggtitle(gender)
+  plot <- plot + geom_line(data=childDF, show.legend = TRUE) +geom_point(data=childDF, show.legend = TRUE) + ggtitle(gender) 
   plot <- ggplotly(plot)
+
   
   
 }
