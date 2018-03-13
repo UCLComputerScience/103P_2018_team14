@@ -1,0 +1,12 @@
+name: GrowthCharts
+title: GrowthCharts
+username:
+account: ucl-cs-team14
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 298401
+bundleId: 1266083
+url: https://ucl-cs-team14.shinyapps.io/GrowthCharts/
+when: 1520944758.06408
+asMultiple: FALSE
+asStatic: FALSE
