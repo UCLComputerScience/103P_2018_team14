@@ -15,6 +15,28 @@ femaleChildrenData <- subset(childrenData,sex==2)
 zValues <- c(-2.652, -2.054, -1.341, -0.674, 0, 0.674, 1.341, 2.054, 2.652)
 pValues <- c("0.4th", "2nd", "9th", "25th", "50th", "75th", "91st", "98th", "99.6th")
 
+maleHeightCentileDF <- data.frame(Age=numeric(),Values=numeric(),Centile=character())
+femaleHeightCentileDF <- data.frame(Age=numeric(),Values=numeric(),Centile=character())
+maleWeightCentileDF <- data.frame(Age=numeric(),Values=numeric(),Centile=character())
+femaleWeightCentileDF <- data.frame(Age=numeric(),Values=numeric(),Centile=character())
+
+
+for(i in 1:9)
+{
+  maleHeightCentileDF<-rbind(maleHeightCentileDF,data.frame(Age=maleLMSData$Months,Values= lmsFunctionToM(maleLMSData$L.ht,maleLMSData$M.ht,maleLMSData$S.ht,zValues[i]),Centile=pValues[i]))
+  femaleHeightCentileDF<-rbind(femaleHeightCentileDF,data.frame(Age=femaleLMSData$Months,Values= lmsFunctionToM(femaleLMSData$L.ht,femaleLMSData$M.ht,femaleLMSData$S.ht,zValues[i]),Centile=pValues[i]))
+  maleWeightCentileDF<-rbind(maleWeightCentileDF,data.frame(Age=maleLMSData$Months,Values= lmsFunctionToM(maleLMSData$L.wt,maleLMSData$M.wt,maleLMSData$S.wt,zValues[i]),Centile=pValues[i]))
+  femlaleWeightCentileDF<-rbind(femlaleWeightCentileDF,data.frame(Age=femaleLMSData$Months,Values= lmsFunctionToM(femaleLMSData$L.wt,femaleLMSData$M.wt,femaleLMSData$S.wt,zValues[i]),Centile=pValues[i]))
+}
+maleWeightCentileDF$Centile <- factor(maleWeightCentileDF$Centile, levels = rev(levels(maleWeightCentileDF$Centile)))
+femaleWeightCentileDF$Centile <- factor(femaleWeightCentileDF$Centile, levels = rev(levels(femaleWeightCentileDF$Centile)))
+maleHeightCentileDF$Centile <- factor(maleHeightCentileDF$Centile, levels = rev(levels(maleHeightCentileDF$Centile)))
+femaleHeightCentileDF$Centile <- factor(femaleHeightCentileDF$Centile, levels = rev(levels(femaleHeightCentileDF$Centile)))
+
+
+
+
+
 #Converts any z score value to a centile
 z2cent <- function(z) {
   np <- abs(z) > qnorm(0.99)
@@ -29,7 +51,7 @@ z2cent <- function(z) {
 
 #LMS to measurement function
 lmsFunctionToM <- function(l,m,s,z){
-  m*((1+l*s*z)^(1/l))
+  m*((1+(l*s*z))^(1/l))
 }
 
 #LMS to Z function
@@ -143,32 +165,33 @@ plotZ <- function(type,gender, childID) {
       childDF <- subset(femaleChildrenData,id==childID & height >0, select = c(Months,height))
     }
   }
-  Centile <- data.frame(Centile = character())
-  
+  Centile <- vector()
   Values<- data.frame(Values=numeric())
-
+  
   for (i in 1:nrow(childDF))
   {
-
+    
     L<-getL(type,gender,childDF[i,1])
     M<-getM(type,gender,childDF[i,1])
     S<-getS(type,gender,childDF[i,1])
-
+    
     data<-childDF[i,2]
     value<-lmsFunctionToZ(L,M,S,data)
     Values<-rbind(Values,value)
-    Centile <- rbind(Centile, z2cent(value))
-
+    
+    
+  }
+  
+  for (i in 1:nrow(Values))
+  {
+    Centile <- c(Centile,z2cent(Values[i,1]))
 
   }
-  childDF <-cbind(childDF,Values,Centile)
+  Centile <- as.data.frame(Centile)
+  childDF<- cbind(childDF, data.frame(Values=Values,Centile=Centile))
   names(childDF)[names(childDF)=="Months"] <- "Age" #Renaming columns
-  names(childDF)[3] <- "Values" #Renaming columns
-  
-  childDF$my_text=paste("Centile: " ,Centile, sep="")
-  DF$my_text=paste("Centile: " ,Centile, sep="")
   DF$Centile <- factor(DF$Centile, levels = rev(levels(DF$Centile)))
-  plot<-ggplot(DF,aes(x=Age,y=Values)) +geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
+  plot<-ggplot(DF,aes(x=Age,y=Values,label=Centile)) +geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
   plot <- plot + ggtitle(gender) + labs(x="Age (Months)",y="Z-Score")+ scale_x_continuous(breaks=seq(0,60,5), limits = c(0,60))
   plot<- plot +geom_point(data=childDF, show.legend = TRUE) + geom_line(data=childDF)
   plot <- ggplotly(plot)
@@ -177,68 +200,68 @@ plotZ <- function(type,gender, childID) {
 }
 
 plotGraph <- function(type, gender, childID){
-  if (type=="wt")
-  {
-    if(gender=="Boys")
-    {
-      Agemos <- maleLMSData$Months 
-      L<-maleLMSData$L.wt
-      M<-maleLMSData$M.wt
-      S<-maleLMSData$S.wt
-      DF<-data.frame(Age=numeric(),Values=numeric(),Centile=integer())
-      childDF <- data.frame(Age=maleChildrenData$Months[maleChildrenData$id==childID], Values=maleChildrenData$weight[maleChildrenData$id==childID])
-    }
-    else
-    {
-      Agemos <- femaleLMSData$Months 
-      L<-femaleLMSData$L.wt
-      M<-femaleLMSData$M.wt
-      S<-femaleLMSData$S.wt
-      DF<-data.frame(Age=numeric(),Values=numeric(),Centile=character())
-      childDF <- data.frame(Age=femaleChildrenData$Months[femaleChildrenData$id==childID], Values=femaleChildrenData$weight[femaleChildrenData$id==childID])
-      
-    }
-  }
-  else
-  {
-    if(gender=="Boys")
-    {
-      Agemos <- maleLMSData$Months 
-      L<-maleLMSData$L.ht
-      M<-maleLMSData$M.ht
-      S<-maleLMSData$S.ht
-      DF<-data.frame(Age=numeric(),Values=numeric(),Centile=integer())
-      childDF <- data.frame(Age=maleChildrenData$Months[maleChildrenData$id==childID], Values=maleChildrenData$height[maleChildrenData$id==childID])
-    }
-    else
-    {
-      Agemos <- femaleLMSData$Months 
-      L<-femaleLMSData$L.ht
-      M<-femaleLMSData$M.ht
-      S<-femaleLMSData$S.ht
-      DF<-data.frame(Age=numeric(),Values=numeric(),Centile=character())
-      childDF <- data.frame(Age=femaleChildrenData$Months[femaleChildrenData$id==childID], Values=femaleChildrenData$height[femaleChildrenData$id==childID])
-      
-    }
-  }
-  for(i in 1:9)
-  {
-    values<-lmsFunctionToM(L,M,S,zValues[i])
-    DF<-rbind(DF,data.frame(Age=Agemos,Values=values,Centile=pValues[i])) #binding the measurements to data frame
-  }
-  
-  DF$Centile <- factor(DF$Centile, levels = rev(levels(DF$Centile)))
-  plot<-ggplot(DF,aes(x=Age,y=Values))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
   
   if(type=="wt")
   {
-    plot<- plot+labs(x="Age (Months)",y="Weight (kg)") + scale_x_continuous(breaks=seq(0,60,5), limits = c(0,60))+scale_y_continuous(breaks = seq(0,30,1), limits = c(0,max(DF$Values)))
+    if (gender=="Boys")
+    {
+      
+      childDF <- data.frame(Age=maleChildrenData$Months[maleChildrenData$id==childID], Values=maleChildrenData$weight[maleChildrenData$id==childID])
+      plot<-ggplot(maleWeightCentileDF,aes(x=Age,y=Values, label = Centile))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
+      plot<- plot+labs(x="Age (Months)",y="Weight (kg)") + scale_x_continuous(breaks=seq(0,60,5), limits = c(0,60))+scale_y_continuous(breaks = seq(0,30,1), limits = c(0,max(maleWeightCentileDF$Values)))
+    }
+    else
+    {
+      childDF <- data.frame(Age=femaleChildrenData$Months[femaleChildrenData$id==childID], Values=femaleChildrenData$weight[femaleChildrenData$id==childID])
+      plot<-ggplot(femaleWeightCentileDF,aes(x=Age,y=Values, label = Centile))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
+      plot<- plot+labs(x="Age (Months)",y="Weight (kg)") + scale_x_continuous(breaks=seq(0,60,5), limits = c(0,60))+scale_y_continuous(breaks = seq(0,30,1), limits = c(0,max(femaleWeightCentileDF$Values)))
+      
+    }
+    
   }
   else
   {
-    plot<- plot+labs(x="Age (Months)",y="Height (cm)")+ scale_x_continuous(breaks=seq(0,60,5))+scale_y_continuous(breaks=seq(40,130,by=5), limits=c(40,max(DF$Values)))
+    if (gender=="Boys")
+    {
+      childDF <- data.frame(Age=maleChildrenData$Months[maleChildrenData$id==childID], Values=maleChildrenData$height[maleChildrenData$id==childID])
+      plot<-ggplot(maleHeightCentileDF,aes(x=Age,y=Values, label = Centile))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
+      plot<- plot+labs(x="Age (Months)",y="Height (cm)")+ scale_x_continuous(breaks=seq(0,60,5))+scale_y_continuous(breaks=seq(40,130,by=5), limits=c(40,max(maleHeightCentileDF$Values)))
+    }
+    else
+    {
+      childDF <- data.frame(Age=femaleChildrenData$Months[femaleChildrenData$id==childID], Values=femaleChildrenData$height[femaleChildrenData$id==childID])
+      plot<-ggplot(femaleHeightCentileDF,aes(x=Age,y=Values, label = Centile))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
+      plot<- plot+labs(x="Age (Months)",y="Height (cm)")+ scale_x_continuous(breaks=seq(0,60,5))+scale_y_continuous(breaks=seq(40,130,by=5), limits=c(40,max(femaleHeightCentileDF$Values)))
+      
+    }
+    
   }
   
+  Centile <- vector()
+  zValues<- data.frame(Values=numeric())
+  
+  for (i in 1:nrow(childDF))
+  {
+    
+    L<-getL(type,gender,childDF[i,1])
+    M<-getM(type,gender,childDF[i,1])
+    S<-getS(type,gender,childDF[i,1])
+    
+    data<-childDF[i,2]
+    value<-lmsFunctionToZ(L,M,S,data)
+    zValues<-rbind(zValues,value)
+    
+    
+  }
+  
+  for (i in 1:nrow(zValues))
+  {
+    Centile <- c(Centile,z2cent(zValues[i,1]))
+    
+  }
+  
+  Centile <- as.data.frame(Centile)
+  childDF <- cbind(childDF,data.frame(Centile=Centile))
   plot <- plot + geom_line(data=childDF, show.legend = TRUE) +geom_point(data=childDF, show.legend = TRUE) + ggtitle(gender) 
   plot <- ggplotly(plot)
 
