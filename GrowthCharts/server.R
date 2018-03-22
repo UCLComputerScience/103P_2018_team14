@@ -26,7 +26,7 @@ for(i in 1:9)
   maleHeightCentileDF<-rbind(maleHeightCentileDF,data.frame(Age=maleLMSData$Months,Values= lmsFunctionToM(maleLMSData$L.ht,maleLMSData$M.ht,maleLMSData$S.ht,zValues[i]),Centile=pValues[i]))
   femaleHeightCentileDF<-rbind(femaleHeightCentileDF,data.frame(Age=femaleLMSData$Months,Values= lmsFunctionToM(femaleLMSData$L.ht,femaleLMSData$M.ht,femaleLMSData$S.ht,zValues[i]),Centile=pValues[i]))
   maleWeightCentileDF<-rbind(maleWeightCentileDF,data.frame(Age=maleLMSData$Months,Values= lmsFunctionToM(maleLMSData$L.wt,maleLMSData$M.wt,maleLMSData$S.wt,zValues[i]),Centile=pValues[i]))
-  femlaleWeightCentileDF<-rbind(femlaleWeightCentileDF,data.frame(Age=femaleLMSData$Months,Values= lmsFunctionToM(femaleLMSData$L.wt,femaleLMSData$M.wt,femaleLMSData$S.wt,zValues[i]),Centile=pValues[i]))
+  femaleWeightCentileDF<-rbind(femaleWeightCentileDF,data.frame(Age=femaleLMSData$Months,Values= lmsFunctionToM(femaleLMSData$L.wt,femaleLMSData$M.wt,femaleLMSData$S.wt,zValues[i]),Centile=pValues[i]))
 }
 maleWeightCentileDF$Centile <- factor(maleWeightCentileDF$Centile, levels = rev(levels(maleWeightCentileDF$Centile)))
 femaleWeightCentileDF$Centile <- factor(femaleWeightCentileDF$Centile, levels = rev(levels(femaleWeightCentileDF$Centile)))
