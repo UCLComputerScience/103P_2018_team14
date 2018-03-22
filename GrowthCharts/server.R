@@ -15,6 +15,16 @@ femaleChildrenData <- subset(childrenData,sex==2)
 zValues <- c(-2.652, -2.054, -1.341, -0.674, 0, 0.674, 1.341, 2.054, 2.652)
 pValues <- c("0.4th", "2nd", "9th", "25th", "50th", "75th", "91st", "98th", "99.6th")
 
+#LMS to measurement function
+lmsFunctionToM <- function(l,m,s,z){
+  m * (1 + l * s * z) ^ (1/l)
+}
+
+#LMS to Z function
+lmsFunctionToZ <- function(l,m,s,data){
+  (((data/m)^l)-1)/(l*s)
+}
+
 maleHeightCentileDF <- data.frame(Age=numeric(),Values=numeric(),Centile=character())
 femaleHeightCentileDF <- data.frame(Age=numeric(),Values=numeric(),Centile=character())
 maleWeightCentileDF <- data.frame(Age=numeric(),Values=numeric(),Centile=character())
@@ -28,6 +38,7 @@ for(i in 1:9)
   maleWeightCentileDF<-rbind(maleWeightCentileDF,data.frame(Age=maleLMSData$Months,Values= lmsFunctionToM(maleLMSData$L.wt,maleLMSData$M.wt,maleLMSData$S.wt,zValues[i]),Centile=pValues[i]))
   femaleWeightCentileDF<-rbind(femaleWeightCentileDF,data.frame(Age=femaleLMSData$Months,Values= lmsFunctionToM(femaleLMSData$L.wt,femaleLMSData$M.wt,femaleLMSData$S.wt,zValues[i]),Centile=pValues[i]))
 }
+
 maleWeightCentileDF$Centile <- factor(maleWeightCentileDF$Centile, levels = rev(levels(maleWeightCentileDF$Centile)))
 femaleWeightCentileDF$Centile <- factor(femaleWeightCentileDF$Centile, levels = rev(levels(femaleWeightCentileDF$Centile)))
 maleHeightCentileDF$Centile <- factor(maleHeightCentileDF$Centile, levels = rev(levels(maleHeightCentileDF$Centile)))
@@ -49,15 +60,7 @@ z2cent <- function(z) {
   th
 }
 
-#LMS to measurement function
-lmsFunctionToM <- function(l,m,s,z){
-  m*((1+(l*s*z))^(1/l))
-}
 
-#LMS to Z function
-lmsFunctionToZ <- function(l,m,s,data){
-  (((data/m)^l)-1)/(l*s)
-}
 getL<-function(type,gender,age){
   if (gender=="Boys")
   {
