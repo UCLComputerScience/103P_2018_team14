@@ -31,6 +31,7 @@ maleWeightCentileDF <- data.frame(Age=numeric(),Values=numeric(),Centile=charact
 femaleWeightCentileDF <- data.frame(Age=numeric(),Values=numeric(),Centile=character())
 
 
+#Calculating centile values for each type of measurement graph
 for(i in 1:9)
 {
   maleHeightCentileDF<-rbind(maleHeightCentileDF,data.frame(Age=maleLMSData$Months,Values= lmsFunctionToM(maleLMSData$L.ht,maleLMSData$M.ht,maleLMSData$S.ht,zValues[i]),Centile=pValues[i]))
@@ -39,6 +40,7 @@ for(i in 1:9)
   femaleWeightCentileDF<-rbind(femaleWeightCentileDF,data.frame(Age=femaleLMSData$Months,Values= lmsFunctionToM(femaleLMSData$L.wt,femaleLMSData$M.wt,femaleLMSData$S.wt,zValues[i]),Centile=pValues[i]))
 }
 
+#Sorting each data frame according to the centile
 maleWeightCentileDF$Centile <- factor(maleWeightCentileDF$Centile, levels = rev(levels(maleWeightCentileDF$Centile)))
 femaleWeightCentileDF$Centile <- factor(femaleWeightCentileDF$Centile, levels = rev(levels(femaleWeightCentileDF$Centile)))
 maleHeightCentileDF$Centile <- factor(maleHeightCentileDF$Centile, levels = rev(levels(maleHeightCentileDF$Centile)))
@@ -85,7 +87,7 @@ getL<-function(type,gender,age){
     }
     
   }
-}
+} #Get appropriate L values from LMS table
 
 getM<-function(type,gender,age){
   if (gender=="Boys")
@@ -111,7 +113,7 @@ getM<-function(type,gender,age){
     }
     
   }
-}
+} #Get appropriate M values from LMS table
 
 getS<-function(type,gender,age){
   if (gender=="Boys")
@@ -137,7 +139,7 @@ getS<-function(type,gender,age){
     }
     
   }
-}
+} #Get appropriate S values from LMS table
 
 plotZ <- function(type,gender, childID) {
   Agemos <- maleLMSData$Months
@@ -210,13 +212,13 @@ plotGraph <- function(type, gender, childID){
     {
       
       childDF <- data.frame(Age=maleChildrenData$Months[maleChildrenData$id==childID], Values=maleChildrenData$weight[maleChildrenData$id==childID])
-      plot<-ggplot(maleWeightCentileDF,aes(x=Age,y=Values, label = Centile))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
+      plot<-ggplot(maleWeightCentileDF,aes(x=Age,y=Values, label = Centile))+geom_path(aes(colour=Centile),linetype='dotdash')
       plot<- plot+labs(x="Age (Months)",y="Weight (kg)") + scale_x_continuous(breaks=seq(0,60,5), limits = c(0,60))+scale_y_continuous(breaks = seq(0,30,1), limits = c(0,max(maleWeightCentileDF$Values)))
     }
     else
     {
       childDF <- data.frame(Age=femaleChildrenData$Months[femaleChildrenData$id==childID], Values=femaleChildrenData$weight[femaleChildrenData$id==childID])
-      plot<-ggplot(femaleWeightCentileDF,aes(x=Age,y=Values, label = Centile))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
+      plot<-ggplot(femaleWeightCentileDF,aes(x=Age,y=Values, label = Centile))+geom_path(aes(colour=Centile),linetype='dotdash')
       plot<- plot+labs(x="Age (Months)",y="Weight (kg)") + scale_x_continuous(breaks=seq(0,60,5), limits = c(0,60))+scale_y_continuous(breaks = seq(0,30,1), limits = c(0,max(femaleWeightCentileDF$Values)))
       
     }
@@ -227,13 +229,13 @@ plotGraph <- function(type, gender, childID){
     if (gender=="Boys")
     {
       childDF <- data.frame(Age=maleChildrenData$Months[maleChildrenData$id==childID], Values=maleChildrenData$height[maleChildrenData$id==childID])
-      plot<-ggplot(maleHeightCentileDF,aes(x=Age,y=Values, label = Centile))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
+      plot<-ggplot(maleHeightCentileDF,aes(x=Age,y=Values, label = Centile))+geom_path(aes(colour=Centile),linetype='dotdash')
       plot<- plot+labs(x="Age (Months)",y="Height (cm)")+ scale_x_continuous(breaks=seq(0,60,5))+scale_y_continuous(breaks=seq(40,130,by=5), limits=c(40,max(maleHeightCentileDF$Values)))
     }
     else
     {
       childDF <- data.frame(Age=femaleChildrenData$Months[femaleChildrenData$id==childID], Values=femaleChildrenData$height[femaleChildrenData$id==childID])
-      plot<-ggplot(femaleHeightCentileDF,aes(x=Age,y=Values, label = Centile))+geom_smooth(aes(colour=Centile),linetype='dotdash',se=FALSE)
+      plot<-ggplot(femaleHeightCentileDF,aes(x=Age,y=Values, label = Centile))+geom_path(aes(colour=Centile),linetype='dotdash')
       plot<- plot+labs(x="Age (Months)",y="Height (cm)")+ scale_x_continuous(breaks=seq(0,60,5))+scale_y_continuous(breaks=seq(40,130,by=5), limits=c(40,max(femaleHeightCentileDF$Values)))
       
     }
